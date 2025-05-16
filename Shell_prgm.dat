@@ -1,0 +1,113 @@
+#!/bin/bash
+
+db_name="student_database.txt"
+
+create_data() {
+    if [[ -e "$db_name" ]]; then
+        echo "Database already exists!"
+    else
+        touch "$db_name"
+        echo "Database created successfully!"
+    fi
+}
+
+view_database() {
+    if [[ -s "$db_name" ]]; then
+        echo "--------------------------------------"
+        printf "%-10s %-15s %-10s %-10s\n" "Roll_No" "Name" "Marks" "Result"
+        echo "--------------------------------------"
+        sort -n "$db_name" | while IFS=" " read -r roll name marks result; do
+            printf "%-10s %-15s %-10s %-10s\n" "$roll" "$name" "$marks" "$result"
+        done
+        echo "--------------------------------------"
+    else
+        echo "Error: Database is empty!"
+    fi
+}
+
+insert_data() {
+    echo "Enter Roll Number:"
+    read roll
+    if grep -q "^$roll " "$db_name"; then
+        echo "Error: Roll number '$roll' already exists!"
+        return
+    fi
+    echo "Enter Name:"
+    read name
+    echo "Enter Marks:"
+    read marks
+    result=$(if [ "$marks" -ge 40 ]; then echo "Pass"; else echo "Fail"; fi)
+    echo "$roll $name $marks $result" >> "$db_name"
+    echo "Data inserted successfully!"
+}
+
+modify_data() {
+    echo "Enter Roll Number to Modify:"
+    read roll
+    if grep -q "^$roll " "$db_name"; then
+        echo "Enter New Name:"
+        read new_name
+        echo "Enter New Marks:"
+        read new_marks
+        new_result=$(if [ "$new_marks" -ge 40 ]; then echo "Pass"; else echo "Fail"; fi)
+        sed -i "s/^$roll .*/$roll $new_name $new_marks $new_result/" "$db_name"
+        echo "Record modified successfully!"
+    else
+        echo "Error: Roll number '$roll' not found!"
+    fi
+}
+
+delete_data() {
+    echo "Enter Roll Number to Delete:"
+    read roll
+    if grep -q "^$roll " "$db_name"; then
+        sed -i "/^$roll /d" "$db_name"
+        echo "Record deleted successfully!"
+    else
+        echo "Error: Roll number '$roll' not found!"
+    fi
+}
+
+view_student() {
+    echo "Enter Roll Number to View:"
+    read roll
+    if grep -q "^$roll " "$db_name"; then
+        echo "--------------------------------------"
+        printf "%-10s %-15s %-10s %-10s\n" "Roll_No" "Name" "Marks" "Result"
+        echo "--------------------------------------"
+        grep "^$roll " "$db_name" | while IFS=" " read -r roll name marks result; do
+            printf "%-10s %-15s %-10s %-10s\n" "$roll" "$name" "$marks" "$result"
+        done
+        echo "--------------------------------------"
+    else
+        echo "Error: Roll number '$roll' not found!"
+    fi
+}
+
+while true; do
+    echo "1. Create Database"
+    echo "2. View Database"
+    echo "3. Insert Data"
+    echo "4. Modify Data"
+    echo "5. Delete Data"
+    echo "6. View Result of Student"
+    echo "7. Exit"
+    echo "Enter your choice:"
+    read choice
+    case $choice in
+        1) create_data ;;
+        2) view_database ;;
+        3) insert_data ;;
+        4) modify_data ;;
+        5) delete_data ;;
+        6) view_student ;;
+        7) exit 0 ;;
+        *) echo "Invalid choice!" ;;
+    esac
+done
+
+
+
+chmod +x shell_prgm.dat
+./shell_prgm.dat OR bash shell_prgm.dat
+
